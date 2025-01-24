@@ -3,10 +3,10 @@
 
 #include "defs.h"
 typedef struct NvmCache NvmCache;
-typedef struct NvmJournalManager NvmJournalManager;
+typedef struct NvmLogManager NvmLogManager;
 
 typedef struct NvmTransactionManager {
-    NvmJournalManager *journal_mgr;
+    NvmLogManager *log_mgr;
     // TODO
 } NvmTransactionManager;
 
@@ -32,6 +32,9 @@ int nvm_txn_recover(NvmTransactionManager *self);
 // 启动一个新事务，将事务上下文初始化到new_txn中
 int nvm_txn_start(NvmTransaction *new_txn, NvmTransactionManager *txn_mgr, ResourceId resource_id);
 void nvm_txn_destruct(NvmTransaction *self);
+
+// 返回和当前事务绑定的日志区管理器
+NvmLogManager *nvm_txn_get_log_mgr(NvmTransaction *self);
 
 // 事务提交，提交后self只能被析构，不能再写日志
 int nvm_txn_commit(NvmTransaction *self);

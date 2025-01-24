@@ -30,9 +30,6 @@ int blk_pool_free(NvmCacheBlkPool *self, NvmCacheBlkId id, NvmTransaction *txn);
 // 缓存淘汰时，选择出被淘汰的一项。注意并发问题，返回后evict_id还没有free，调用者可能继续操作这个缓存块
 int blk_pool_evict(NvmCacheBlkPool *self, NvmCacheBlkId *evict_id, NvmTransaction *txn);
 
-// 把缓存块全部刷下去。TODO: 指定刷的范围？
-int blk_pool_flush(NvmCacheBlkPool *self, NvmTransaction *txn);
-
 // 获取id对应的缓冲块，当blk还在使用时，blk不应该被淘汰。活跃信息应该在内存中维护，所以也不需要事务
 int blk_pool_get(NvmCacheBlkPool *self, NvmCacheBlkId id, NvmCacheBlk *blk);
 
