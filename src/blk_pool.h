@@ -4,6 +4,8 @@
 #include "defs.h"
 #include "access.h"
 
+// NVM 缓存以扇区块为单位，所有用于缓存的 NVM 空间构成缓存池。此数据结构管理 NVM 上缓存池的状态、分配和回收。其他模块使用缓存块号从此数据结构中获得 NVM 上对应缓存块的引用。
+
 typedef struct NvmCache NvmCache;
 typedef struct NvmTransaction NvmTransaction;
 

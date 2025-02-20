@@ -2,6 +2,8 @@
 #define NVM_CACHE_TRANSACTION
 
 #include "defs.h"
+
+// NVM 可能面临断电等情况，且大多数情况无法保证原子性地对 NVM 上数据结构进行完整的修改，因此 NVM 修改使用事务机制。对于一个 I/O 请求，可以创建一个事务。所有可能修改 NVM 上数据的方法，都要求传入一个 NvmTransaction 事务对象，事务对象绑定到日志区（NvmLogManager），修改 NVM 的方法必须确保 WAL（先写日志）。
 typedef struct NvmCache NvmCache;
 typedef struct NvmLogManager NvmLogManager;
 

@@ -3,6 +3,8 @@
 
 #include <linux/types.h>
 
+// 定义模块的一些基础数据类型和常量。
+
 typedef u64 LbaType;
 typedef u64 NvmCacheBlkId;
 typedef u32 ResourceId;  // 对应块驱动层的硬件队列ID

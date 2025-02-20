@@ -1,6 +1,8 @@
 #ifndef NVM_CACHE_CORE
 #define NVM_CACHE_CORE
 
+// 所有关键数据结构的集合。在初始化阶段，nvm_cache_init() 负责构造 NvmCache 对象，构造时解析 NVM 上的元数据，并构造出 Mapper、BlkPool、TransactionManager 等管理对应数据和元数据的结构。
+
 typedef struct NvmAccessor NvmAccessor;
 typedef struct block_device block_device;
 typedef struct NvmCacheMapper NvmCacheMapper;

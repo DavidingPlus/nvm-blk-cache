@@ -5,6 +5,8 @@
 
 #include "defs.h"
 
+// 提供底层块设备的同步I/O接口。在 NvmCache 构造和析构，以及和需要读写底层块设备时使用它即可。
+
 typedef struct block_device block_device;
 
 typedef struct NvmCacheLowerDev {

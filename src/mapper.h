@@ -3,6 +3,8 @@
 
 #include "defs.h"
 
+// 缓存的底层块设备扇区地址形式是逻辑块地址（LBA），NVM 上需要持久化当前缓存的 LBA 逻辑块地址和缓存块号的映射关系，NvmCacheMapper 管理 NVM 上这些数据和元数据。
+
 typedef struct NvmCache NvmCache;
 typedef struct NvmTransaction NvmTransaction;
 
