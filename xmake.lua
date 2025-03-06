@@ -5,6 +5,7 @@ option ("with-gtest", {showmenu = true, description = "Whether to enable unit te
 add_includedirs ("src/")
 
 target ("nvmcache")
+    set_languages ("gnu99")
     add_rules ("platform.linux.module")
     add_files ("src/*.c")
     set_values ("linux.driver.linux-headers", "$(linux-headers)")
