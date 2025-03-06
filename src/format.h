@@ -9,7 +9,9 @@ typedef struct NvmCacheFormatArgs
 {
     const char *lower_device_file;
     int queue_num;
+
     // TODO
+
 } NvmCacheFormatArgs;
 
 

@@ -1,6 +1,7 @@
 #include "format.h"
 
 #include "access.h"
+#include "defs.h"
 
 #include <linux/module.h>
 
@@ -23,7 +24,7 @@ int nvm_cache_is_formatted(int *res, NvmAccessor *accessor, const char *lower_de
 
     if (!virtAddr.addr || (u64)0 == virtAddr.len) *res = false;
 
-    // TODO 可能还需验证 NVM 头部的一些标识信息，依赖 NVM 管理器。
+    // TODO 还需验证 NVM 头部的一些标识信息。
 
     nvm_accessor_end_access(accessor, &obj);
 
@@ -31,8 +32,17 @@ int nvm_cache_is_formatted(int *res, NvmAccessor *accessor, const char *lower_de
     return 0;
 }
 
+// TODO NvmCacheFormatArgs 参数暂时不知道有什么作用。
 int nvm_cache_format(NvmAccessor *accessor, NvmCacheFormatArgs *arg)
 {
-    // TODO NVM 物理布局的格式化，依赖 NVM 管理器的接口。
+    NvmObj obj = nvm_accessor_get_full_nvm_range(accessor);
+    NvmVirtAddrRange virtAddr = nvm_accessor_start_access(accessor, &obj);
+
+    // 在头部的 lba 数组中写 8 字节的全 f 取默认值。
+    LbaType lbaDefault = 0xffffffffffffffff;
+    u64 size = virtAddr.len / (8 + 4 * 1024);
+    for (u64 i = 0; i < size; ++i) memcpy((char *)virtAddr.addr + i * 8, &lbaDefault, 8);
+
+
     return 0;
 }
