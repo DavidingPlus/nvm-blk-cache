@@ -1,30 +1,53 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include "blk_pool.h"
+#include "EmptyBlkManager/queue.h"
+#include "UsedBlkManager/hashtable.h"
 
-int blk_pool_init(NvmCacheBlkPool *blk_pool, NvmCache *cache) {
-    // TODO
-    return 0;
+// 初始化 NvmCacheBlkPool
+void initNvmBlkManager(NvmCacheBlkPool *manager, size_t hashTableSize) {
+    initQueue(&manager->emptyBlocksQueue);
+    manager->usedBlocksTable = createHashTable(hashTableSize);
 }
 
-void blk_pool_destruct(NvmCacheBlkPool *self) {
-    // TODO
+// 构建 NVM 块
+void buildNvmBlock(NvmCacheBlkPool *manager, uint64_t nvmBlock, uint64_t lba) {
+    if (lba == UINT64_MAX) {  // LBA 为最大值时，构建为空块，使用队列管理
+        enqueue(&manager->emptyBlocksQueue, nvmBlock);
+    } else {  // 否则，构建为有效块，使用哈希表管理
+        insert(manager->usedBlocksTable, lba, nvmBlock);
+    }
 }
 
-int blk_pool_alloc(NvmCacheBlkPool *self, NvmCacheBlkId *new_id, NvmTransaction *txn) {
-    // TODO
-    return 0;
+// 获取空的 NVM 块号
+int getEmptyBlock(NvmCacheBlkPool *manager, uint64_t *nvmBlock) {
+
+    // 检查队列中是否有空块
+    if (!isEmpty(&manager->emptyBlocksQueue)) {
+        *nvmBlock = dequeue(&manager->emptyBlocksQueue);
+        return 0;
+    }
+
+    // 如果队列中没有空块，从哈希表中返回下一个被分配的块号
+    HashNode *node = next(manager->usedBlocksTable);
+    if (node != NULL) {
+        *nvmBlock = node->value;
+        deleteKey(manager->usedBlocksTable, node->key);
+        return 1;
+    }
+
+    *nvmBlock = UINT64_MAX;
+    return 1;
 }
 
-int blk_pool_free(NvmCacheBlkPool *self, NvmCacheBlkId id, NvmTransaction *txn) {
-    // TODO
-    return 0;
+
+uint64_t *searchNvmBlkOfLba(NvmCacheBlkPool *manager, uint64_t key){
+    uint64_t *nvmBlk = search(manager->usedBlocksTable, key);
+    return nvmBlk;
 }
 
-int blk_pool_evict(NvmCacheBlkPool *self, NvmCacheBlkId *evict_id, NvmTransaction *txn) {
-    // TODO
-    return 0;
-}
-
-int blk_pool_flush(NvmCacheBlkPool *self, NvmTransaction *txn) {
-    // TODO
-    return 0;
+void destroyNvmBlkManager(NvmCacheBlkPool *manager){
+    destructQueue(&manager->emptyBlocksQueue);
+    destructHashTable(manager->usedBlocksTable);
 }
