@@ -2,22 +2,21 @@
 #include "lower_dev.h"
 #include "NvmBlkPoolManager/blk_pool.h"
 
-int nvm_cache_handle_io(NvmCache *cache, NvmCacheIoReq *req) {
-
+int nvm_cache_handle_io(NvmCache *cache, NvmCacheIoReq *req) \
+{
     int ret;
     uint64_t lba_offset = 0;
-
 
     //判断具体请求是读还是写
     if(req->dir == CACHE_READ)
     {
         while(lba_offset < req->lba_num)
         {
-            uint64_t *nvmBlkPtr = NULL;
-            nvmBlkPtr = searchNvmBlkOfLba(cache->blk_pool, req->lba + lba_offset);
+            uint64_t *nvm_blk_ptr = NULL;
+            nvm_blk_ptr = search_nvm_blk_of_lba(cache->blk_pool, req->lba + lba_offset);
     
             //判断lba是否在nvmBlk中，若在，进入内部逻辑，不在，直接转发至lower_dev接口
-            if(nvmBlkPtr)
+            if(nvm_blk_ptr)
             {
                 //TODO
                 //通过nvmBlkId读取对应的Nvm块，存放至对应的buffer对应的偏移中
@@ -42,34 +41,32 @@ int nvm_cache_handle_io(NvmCache *cache, NvmCacheIoReq *req) {
                     pr_err("Error: IO request failed for LBA: %llu, sector: %llu, sector_num: %llu\n", 
                            req->lba, lower_req->sector, lower_req->sector_num);
                 }
-
                 kfree(lower_req);  // 释放内存，避免泄露
             }
             lba_offset++;
         }
-
-
     }
     else
     {
         while(lba_offset < req->lba_num)
         {
-            uint64_t *nvmBlkPtr = NULL;
-            nvmBlkPtr = searchNvmBlkOfLba(cache->blk_pool, req->lba + lba_offset);
+            uint64_t *nvm_blk_ptr = NULL;
+            nvm_blk_ptr = search_nvm_blk_of_lba(cache->blk_pool, req->lba + lba_offset);
     
             //判断lba是否在nvmBlk中，若在，进入内部逻辑，不在，直接转发至lower_dev接口
-            if(nvmBlkPtr)
+            if(nvm_blk_ptr)
             {
-                //TODO
-                //通过nvmBlkId写对应的Nvm块，存放至对应的buffer对应的偏移中
+                //
+                //TODO:通过nvmBlkId写对应的Nvm块，存放至对应的buffer对应的偏移中
+                //
             }
             else
             {
-                ret = getEmptyBlock(cache->blk_pool, nvmBlkPtr);
-                if(ret == 1 && *nvmBlkPtr == UINT64_MAX)
+                ret = get_empty_block(cache->blk_pool, nvm_blk_ptr);
+                if(ret == 1 && *nvm_blk_ptr == UINT64_MAX)
                 {
-                    pr_err("Error: blk_pool allocation failed. Invalid block ID (nvmBlkPtr: %llu) for lba: %llu\n", 
-                        *nvmBlkPtr, req->lba + lba_offset);
+                    pr_err("Error: blk_pool allocation failed. Invalid block ID (nvm_blk_ptr: %llu) for lba: %llu\n", 
+                        *nvm_blk_ptr, req->lba + lba_offset);
                 }
 
                 //如果返回的nvm块有效且已被分配，需要先将其写回，得到空闲的块后在进行写操作
@@ -87,10 +84,11 @@ int nvm_cache_handle_io(NvmCache *cache, NvmCacheIoReq *req) {
 
                     //
                     //TODO:查询nvm上的映射数组，将*nvmBlkPtr转化为对应的lba号，写入*write_back_lba。
+                    //
                     
                     if(write_back_lba == NULL)
                     {
-                        pr_err("Error: Failed to find NVM block for LBA, nvmBlkPtr=%llu\n", *nvmBlkPtr);
+                        pr_err("Error: Failed to find NVM block for LBA, nvm_blk=%llu\n", *nvm_blk_ptr);
                     }
 
                     //
@@ -117,11 +115,11 @@ int nvm_cache_handle_io(NvmCache *cache, NvmCacheIoReq *req) {
                     }
                     
                     //
-                    //TODO: 对nvmBlkId进行写操作
+                    //TODO: 对nvm_blk_id所指向的nvm块进行写操作
                     //
 
                     //在blk_pool中进行记录
-                    buildNvmBlock(cache->blk_pool, nvmBlkPtr, req->lba + lba_offset);
+                    build_nvm_block(cache->blk_pool, nvm_blk_ptr, req->lba + lba_offset);
 
                     kfree(lower_req);      // 释放 lower_req 内存
                     kfree(write_back_buffer);  // 释放 write_back_buffer 内存

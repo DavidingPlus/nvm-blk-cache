@@ -6,7 +6,8 @@
 
 typedef struct NvmCache NvmCache;
 
-typedef struct NvmCacheIoReq {
+typedef struct NvmCacheIoReq 
+{
     LbaType lba;
     uint64_t lba_num;
     void *buffer;
