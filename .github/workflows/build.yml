@@ -1,0 +1,60 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+  workflow_dispatch:
+
+# see more at https://github.com/DavidingPlus/nvmixfs/issues/1
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:20.04
+    env:
+      KERNEL_VERSION: "5.4.0-208-generic"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+
+          apt update
+
+          apt install curl build-essential -y
+
+          apt install linux-headers-${KERNEL_VERSION} -y
+
+      - name: Install XMake
+        run: |
+
+          curl -fsSL https://xmake.io/shget.text | bash
+
+          # use xmake as root
+          alias xmake="~/.local/bin/xmake"
+          export XMAKE_ROOT=y
+
+          # keep xmake up to date
+          xmake update -s dev
+
+      - name: Configure XMake
+        working-directory: ${{github.workspace}}
+        run: |
+
+          alias xmake="~/.local/bin/xmake"
+          export XMAKE_ROOT=y
+
+          xmake f -m release --linux-headers=/usr/src/linux-headers-${KERNEL_VERSION}/
+      
+      - name: Build Targets
+        working-directory: ${{github.workspace}}
+        run: |
+
+          alias xmake="~/.local/bin/xmake"
+          export XMAKE_ROOT=y
+
+          xmake build
+
