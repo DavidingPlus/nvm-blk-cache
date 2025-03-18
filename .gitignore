@@ -19,3 +19,5 @@ core
 *.mod
 *.order
 *.symvers
+
+./clangd

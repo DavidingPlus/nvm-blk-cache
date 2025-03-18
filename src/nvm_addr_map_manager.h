@@ -29,7 +29,7 @@ typedef struct NvmAddrMapManager{
 
 /***********************private API***********************/
 
-void* phy_addr_map_virt_addr(NvmAddrMapManager* this, phys_addr_t nvm_phy_addr);
+// void* phy_addr_map_virt_addr(NvmAddrMapManager* this, phys_addr_t nvm_phy_addr);
 // void* phy_addr_map_virt_addr_in_vmalloc(NvmAddrMapManager *this, phys_addr_t nvm_phy_addr);
 
 /***********************private API***********************/
