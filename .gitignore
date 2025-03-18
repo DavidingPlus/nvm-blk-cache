@@ -20,4 +20,4 @@ core
 *.order
 *.symvers
 
-./clangd
+.clangd/

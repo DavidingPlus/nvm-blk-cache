@@ -1,4 +1,4 @@
-#include "nvm_addr_map_manager.h"
+#include "nvm_manager.h"
 
 #include <linux/slab.h>
 #include <linux/mm.h>
@@ -7,7 +7,7 @@
 
 /***********************private API***********************/
 
-void* phy_addr_map_virt_addr(NvmAddrMapManager *this, phys_addr_t nvm_phy_addr){
+void* phy_addr_map_virt_addr(NvmManager *this, phys_addr_t nvm_phy_addr){
     long offset_of_paddr_and_vaddr = (unsigned long)this->nvm_virt_start_addr - this->nvm_phy_start_addr;
     return (void *) (nvm_phy_addr += offset_of_paddr_and_vaddr);
 }
@@ -16,10 +16,10 @@ void* phy_addr_map_virt_addr(NvmAddrMapManager *this, phys_addr_t nvm_phy_addr){
 
 /***********************public API***********************/
 
-NvmAddrMapManager* nvm_addr_map_manager_init(
+NvmManager* nvm_addr_map_manager_init(
         phys_addr_t nvm_phy_start_addr, unsigned long nvm_phy_length){
     
-    NvmAddrMapManager *nvm_addr_map_manager;
+    NvmManager *nvm_manager;
     phys_addr_t aligned_nvm_phy_start_addr, aligned_nvm_phy_end_addr;
     void *nvm_virt_start_addr;
     unsigned long aligned_nvm_phy_length, nvm_virt_length;;
@@ -48,19 +48,19 @@ NvmAddrMapManager* nvm_addr_map_manager_init(
     }
 
     // 申请管理器
-    nvm_addr_map_manager = kmalloc(sizeof(NvmAddrMapManager), GFP_KERNEL);
-    if(nvm_addr_map_manager == NULL){
+    nvm_manager = kmalloc(sizeof(NvmManager), GFP_KERNEL);
+    if(nvm_manager == NULL){
         pr_err("kmalloc NvmAddrMapManager fail!\n");
         goto kamlloc_fail;
     }
     nvm_virt_length = aligned_nvm_phy_length;
-    nvm_addr_map_manager->nvm_phy_start_addr          = aligned_nvm_phy_start_addr;
-    nvm_addr_map_manager->nvm_phy_length              = aligned_nvm_phy_length;
-    nvm_addr_map_manager->nvm_virt_start_addr         = nvm_virt_start_addr;
-    nvm_addr_map_manager->nvm_virt_length             = aligned_nvm_phy_length;
-    nvm_addr_map_manager->phy_addr_map_virt_addr_func = phy_addr_map_virt_addr;
+    nvm_manager->nvm_phy_start_addr          = aligned_nvm_phy_start_addr;
+    nvm_manager->nvm_phy_length              = aligned_nvm_phy_length;
+    nvm_manager->nvm_virt_start_addr         = nvm_virt_start_addr;
+    nvm_manager->nvm_virt_length             = aligned_nvm_phy_length;
+    nvm_manager->phy_addr_map_virt_addr_func = phy_addr_map_virt_addr;
 
-    return nvm_addr_map_manager;
+    return nvm_manager;
 
 kamlloc_fail:
     memunmap(&aligned_nvm_phy_start_addr);   // ? 为什么不用提供内存长度
@@ -71,7 +71,7 @@ aligned_fail:
     return NULL;
 }
 
-int nvm_addr_map_manager_destory(NvmAddrMapManager* this){
+int nvm_addr_map_manager_destory(NvmManager* this){
     if(!this){
         pr_err("NvmAddrMapManager pointer unvaild!\n");
         return EINVAL;
@@ -83,7 +83,7 @@ int nvm_addr_map_manager_destory(NvmAddrMapManager* this){
     return 0;
 }
 
-void* nvm_phy_addr_map_virt_addr(NvmAddrMapManager *this, phys_addr_t phy_addr){
+void* nvm_phy_addr_map_virt_addr(NvmManager *this, phys_addr_t phy_addr){
     void* nvm_virt_addr;
 
     if(this->nvm_phy_start_addr > phy_addr ||
