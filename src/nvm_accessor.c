@@ -1,6 +1,6 @@
 #include "nvm_accessor.h"
 
-#include "nvm_addr_map_manager.h"
+#include "nvm_manager.h"
 #include "defs.h"
 
 #include <linux/io.h>
@@ -8,7 +8,7 @@
 
 /***********************public API***********************/
 
-NvmAccessor* nvm_accessor_init(NvmAddrMapManager* nvm_addr_map_manager){
+NvmAccessor* nvm_accessor_init(NvmManager* nvm_addr_map_manager){
     if (!nvm_addr_map_manager) {
         pr_err("nvm_addr_map_manager unvailed!");
         goto parameter_unvailed;
@@ -28,7 +28,7 @@ parameter_unvailed:
     return NULL;
 }
 
-int global_nvm_accessor_init(NvmAddrMapManager* nvm_addr_map_manager){
+int global_nvm_accessor_init(NvmManager* nvm_addr_map_manager){
     if (!nvm_addr_map_manager) {
         pr_err("nvm_addr_map_manager unvailed!");
         goto parameter_unvailed;
