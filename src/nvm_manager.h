@@ -19,6 +19,7 @@
     }
 */
 
+// 只映射一段物理内存
 typedef struct NvmManager{
     phys_addr_t nvm_phy_start_addr;
     unsigned long nvm_phy_length;

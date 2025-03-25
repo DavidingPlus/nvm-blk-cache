@@ -41,6 +41,7 @@ NvmManager* nvm_addr_map_manager_init(
         pr_err("request_mem_region fail!\n");
         goto request_mem_region_fail;
     }
+    // TODO：是否映射为非缓存内存
     nvm_virt_start_addr = memremap(aligned_nvm_phy_start_addr, aligned_nvm_phy_length, MEMREMAP_WB);
     if (!nvm_virt_start_addr) {
         pr_err("memremap fail!\n");

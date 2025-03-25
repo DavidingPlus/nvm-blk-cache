@@ -6,6 +6,46 @@
 #include <linux/io.h>
 #include <linux/slab.h>
 
+/***********************private API***********************/
+
+void* get_vaddr_by_paddr(NvmAccessor* this, phys_addr_t paddr){
+    if(!this){
+        pr_err("Accessor pointer unvaild!\n");
+        return EINVAL;
+    }
+
+    void* vaddr = this->nvm_addr_map_manager
+            ->phy_addr_map_virt_addr_func(this->nvm_addr_map_manager, paddr);
+    return vaddr;
+}
+
+void* get_vaddr_by_lba(NvmAccessor* this, u64 lba){
+    if(!this){
+        pr_err("Accessor pointer unvaild!\n");
+        return EINVAL;
+    }
+
+    phys_addr_t paddr = 
+            lba * CACHE_BLOCK_SIZE + this->nvm_addr_map_manager->nvm_phy_start_addr;
+    return get_vaddr_by_paddr(this, paddr);
+}
+
+// TODO：安全判断,返回值
+size_t nvm_accessor_write(NvmAccessor* this, void *buffer, size_t count, void* virtAddr){
+    memcpy(virtAddr, buffer, count);
+    wmb();
+    clflush(virtAddr);
+    return count;
+};
+
+size_t nvm_accessor_read(NvmAccessor* this, void *buffer, size_t count, void* virtAddr){
+    rmb();
+    memcpy(buffer, virtAddr, count);
+    return count;
+};
+// 多线程下内存屏障要配合原子变量来进行无锁同步
+/***********************private API***********************/
+
 /***********************public API***********************/
 
 NvmAccessor* nvm_accessor_init(NvmManager* nvm_addr_map_manager){
@@ -50,38 +90,28 @@ int accessor_destory(NvmAccessor* this){
     return 0;
 }
 
-size_t nvm_accessor_write(NvmAccessor* this, void *buffer, size_t count, LbaType lba){
-    return 0;
-};
+size_t nvm_accessor_write_block(NvmAccessor* this, void *buffer, NvmCacheBlkId blkId){
+    void* virtAddr = get_vaddr_by_lba(this, blkId);
+    return nvm_accessor_write(this, buffer, CACHE_BLOCK_SIZE, virtAddr);
+}
 
-size_t nvm_accessor_read(NvmAccessor* this, void *buffer, size_t count, LbaType lba){
-    return 0;
-};
+size_t nvm_accessor_read_block(NvmAccessor* this, void *buffer, NvmCacheBlkId blkId){
+    void* virtAddr = get_vaddr_by_lba(this, blkId);
+    return nvm_accessor_read(this, buffer, CACHE_BLOCK_SIZE, virtAddr);
+}
+
+size_t nvm_accessor_write_byte(NvmAccessor* this, void *buffer, u64 offset){
+    u64 paddr = offset + this->nvm_addr_map_manager->nvm_phy_start_addr;
+    void* virtAddr = get_vaddr_by_paddr(this, paddr);                       // get_vaddr_by_paddr 改为 get_vaddr_by_offset（偏移量）
+    return nvm_accessor_write(this, buffer, CACHE_BLOCK_SIZE, virtAddr);
+}
+
+size_t nvm_accessor_read_byte(NvmAccessor* this, void *buffer, u64 offset){
+    u64 paddr = offset + this->nvm_addr_map_manager->nvm_phy_start_addr;
+    void* virtAddr = get_vaddr_by_paddr(this, paddr);
+    return nvm_accessor_read(this, buffer, CACHE_BLOCK_SIZE, virtAddr);
+}
 
 /***********************public API***********************/
 
-/***********************private API***********************/
 
-void* get_vaddr_by_paddr(NvmAccessor* this, phys_addr_t paddr){
-    if(!this){
-        pr_err("Accessor pointer unvaild!\n");
-        return EINVAL;
-    }
-
-    void* vaddr = this->nvm_addr_map_manager
-            ->phy_addr_map_virt_addr_func(this->nvm_addr_map_manager, paddr);
-    return vaddr;
-}
-
-void* get_vaddr_by_lba(NvmAccessor* this, u64 lba){
-    if(!this){
-        pr_err("Accessor pointer unvaild!\n");
-        return EINVAL;
-    }
-
-    phys_addr_t paddr = 
-            lba * CACHE_BLOCK_SIZE + this->nvm_addr_map_manager->nvm_phy_start_addr;
-    return get_vaddr_by_paddr(this, paddr);
-}
-
-/***********************private API***********************/
