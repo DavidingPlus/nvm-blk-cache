@@ -6,16 +6,13 @@
 
 typedef struct NvmAccessor{
     NvmManager* nvm_addr_map_manager;
+    bool is_valid;
     // TODO 内存保护：需要访问的时候建立地址映射
 }NvmAccessor;
-
-NvmAccessor global_nvm_accessor;
 
 /***********************public API***********************/
 
 NvmAccessor* nvm_accessor_init(NvmManager* nvm_addr_map_manager);
-
-int global_nvm_accessor_init(NvmManager* nvm_addr_map_manager);
 
 int nvm_accessor_destory(NvmAccessor* this);
 
