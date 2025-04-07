@@ -2,8 +2,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "blk_pool.h"
+#include "../defs.h"
 #include "EmptyBlkManager/queue.h"
 #include "UsedBlkManager/hashtable.h"
+
 
 // 初始化 NvmCacheBlkPool
 void init_nvm_blk_pool(NvmCacheBlkPool *manager, size_t hash_table_size) 
@@ -13,7 +15,7 @@ void init_nvm_blk_pool(NvmCacheBlkPool *manager, size_t hash_table_size)
 }
 
 // 构建 NVM 块
-void build_nvm_block(NvmCacheBlkPool *manager, uint64_t nvm_blk_id, uint64_t lba) 
+void build_nvm_block(NvmCacheBlkPool *manager, u64 nvm_blk_id, u64 lba) 
 {
     if (lba == UINT64_MAX) 
     {
@@ -25,8 +27,24 @@ void build_nvm_block(NvmCacheBlkPool *manager, uint64_t nvm_blk_id, uint64_t lba
     }
 }
 
+void build_nvm_empty_block(NvmCacheBlkPool *manager, u64 nvm_blk_id, u64 lba)
+{
+    if (lba == UINT64_MAX) 
+    {
+        enqueue(&manager->empty_blocks_queue, nvm_blk_id);  // 构建为空块，使用队列管理
+    }
+}
+
+void build_nvm_valid_block(NvmCacheBlkPool *manager, u64 nvm_blk_id, u64 lba)
+{
+    if(lba != UINT64_MAX)
+    {
+        insert(manager->used_blocks_table, lba, nvm_blk_id);
+    }
+}
+
 // 获取空的 NVM 块号
-int get_empty_block(NvmCacheBlkPool *manager, uint64_t *nvm_blk_id) 
+int get_empty_block(NvmCacheBlkPool *manager, u64 *nvm_blk_id) 
 {
 
     // 检查队列中是否有空块
@@ -50,9 +68,9 @@ int get_empty_block(NvmCacheBlkPool *manager, uint64_t *nvm_blk_id)
 }
 
 
-uint64_t *search_nvm_blk_of_lba(NvmCacheBlkPool *manager, uint64_t key)
+u64 *search_nvm_blk_by_lba(NvmCacheBlkPool *manager, u64 key)
 {
-    uint64_t *nvm_blk_ptr = search(manager->used_blocks_table, key);
+    u64 *nvm_blk_ptr = search(manager->used_blocks_table, key);
     return nvm_blk_ptr;
 }
 
