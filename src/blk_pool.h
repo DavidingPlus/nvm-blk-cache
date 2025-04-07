@@ -2,9 +2,9 @@
 #define NVM_BLK_MANAGER_H
 
 #include <stdint.h>
-#include "../defs.h"
-#include "EmptyBlkManager/queue.h"
-#include "UsedBlkManager/hashtable.h"
+#include "defs.h"
+#include "queue.h"
+#include "hashtable.h"
 
 // NVM 块管理结构体
 typedef struct NvmCacheBlkPool 

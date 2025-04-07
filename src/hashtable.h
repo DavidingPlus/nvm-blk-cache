@@ -1,7 +1,7 @@
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
-#include "../defs.h"
+#include "defs.h"
 
 // 哈希节点结构体，用于存储键值对及链表指针
 typedef struct HashNode 

@@ -1,6 +1,5 @@
 #include "hashtable.h"
-#include "../defs.h"
-#include <stdlib.h>
+#include "defs.h"
 
 // 内部哈希函数：简单取模
 static size_t hash_func(u64 key, size_t size) 

@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include "queue.h"
+#include "defs.h"
 
 // 初始化队列
 void init_queue(Queue *queue) 

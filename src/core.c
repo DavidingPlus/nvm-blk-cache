@@ -3,7 +3,7 @@
 #include "access.h"
 #include "lower_dev.h"
 #include "mapper.h"
-#include "NvmBlkPoolManager/blk_pool.h"
+#include "blk_pool.h"
 
 int nvm_cache_init(NvmCache *cache, NvmAccessor *accessor, NvmManager *accessor_manager, 
                    NvmCacheLowerDev *lower_bdev, NvmCacheMapper *mapper, NvmCacheBlkPool *blk_pool) 

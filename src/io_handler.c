@@ -1,6 +1,6 @@
 #include "io_handler.h"
 #include "lower_dev.h"
-#include "NvmBlkPoolManager/blk_pool.h"
+#include "blk_pool.h"
 #include "mapper.h"
 #include "core.h"
 #include "defs.h"

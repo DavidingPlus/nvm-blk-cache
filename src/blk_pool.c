@@ -2,9 +2,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "blk_pool.h"
-#include "../defs.h"
-#include "EmptyBlkManager/queue.h"
-#include "UsedBlkManager/hashtable.h"
+#include "defs.h"
+#include "queue.h"
+#include "hashtable.h"
 
 
 // 初始化 NvmCacheBlkPool

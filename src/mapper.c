@@ -1,7 +1,7 @@
 #include "mapper.h"
 #include "core.h"
 #include "access.h"
-#include "NvmBlkPoolManager/blk_pool.h"
+#include "blk_pool.h"
 
 
 int cache_mapper_init(NvmCacheMapper *mapper, u64 nvm_phy_length) 

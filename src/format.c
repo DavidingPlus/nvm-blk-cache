@@ -2,7 +2,7 @@
 #include "core.h"
 #include "access.h"
 #include "mapper.h"
-#include "NvmBlkPoolManager/blk_pool.h"
+#include "blk_pool.h"
 
 int nvm_cache_format(NvmCache *cache) 
 {
