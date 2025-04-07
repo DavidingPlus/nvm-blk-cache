@@ -1,40 +1,34 @@
-#ifndef NVM_CACHE_BLK_POOL
-#define NVM_CACHE_BLK_POOL
+#ifndef NVM_BLK_MANAGER_H
+#define NVM_BLK_MANAGER_H
 
-#include "defs.h"
-#include "access.h"
+#include <stdint.h>
+#include "../defs.h"
+#include "EmptyBlkManager/queue.h"
+#include "UsedBlkManager/hashtable.h"
 
-// NVM 缓存以扇区块为单位，所有用于缓存的 NVM 空间构成缓存池。此数据结构管理 NVM 上缓存池的状态、分配和回收。其他模块使用缓存块号从此数据结构中获得 NVM 上对应缓存块的引用。
-
-typedef struct NvmCache NvmCache;
-typedef struct NvmTransaction NvmTransaction;
-
-// 空闲缓存池管理结构
-// 根据设计，可以是NVM上统一的缓存池，也可以是每个resource_id私有的缓存池、或公共缓存池
-typedef struct NvmCacheBlkPool {
-    // TODO
+// NVM 块管理结构体
+typedef struct NvmCacheBlkPool 
+{
+    Queue empty_blocks_queue;  // 用于管理空块的队列
+    HashTable *used_blocks_table;  // 用于管理有效块的哈希表
 } NvmCacheBlkPool;
 
-// NVM上的一个缓冲块的引用
-typedef struct NvmCacheBlk {
-    NvmObj obj;
-    // TODO
-} NvmCacheBlk;
+// 初始化 NvmCacheBlkPool
+void init_nvm_blk_pool(NvmCacheBlkPool *manager, size_t hash_table_size);
 
-/***********************public API***********************/
+// 构建 NVM 块
+void build_nvm_empty_block(NvmCacheBlkPool *manager, u64 nvm_blk_id, u64 lba);
 
-int blk_pool_init(NvmCacheBlkPool *blk_pool, NvmCache *cache);
-void blk_pool_destruct(NvmCacheBlkPool *self);
+void build_nvm_valid_block(NvmCacheBlkPool *manager, u64 nvm_blk_id, u64 lba);
 
-int blk_pool_alloc(NvmCacheBlkPool *self, NvmCacheBlkId *new_id, NvmTransaction *txn);
-int blk_pool_free(NvmCacheBlkPool *self, NvmCacheBlkId id, NvmTransaction *txn);
+// 获取空的 NVM 块号
+// 如果返回值为0，则返回的是空nvm块
+// 如果返回值为1，且nvmBlock号有效，则返回的是已分配的块，并且该块已不再被blk_pool管理
+// 如果返回值为1，且nvmBlock号为UINT64_MAX，则该执行逻辑出了bug
+int get_empty_block(NvmCacheBlkPool *manager, u64 *nvm_blk_ptr);
 
-// 缓存淘汰时，选择出被淘汰的一项。注意并发问题，返回后evict_id还没有free，调用者可能继续操作这个缓存块
-int blk_pool_evict(NvmCacheBlkPool *self, NvmCacheBlkId *evict_id, NvmTransaction *txn);
+u64 *search_nvm_blk_by_lba(NvmCacheBlkPool *manager, u64 key);
 
-// 获取id对应的缓冲块，当blk还在使用时，blk不应该被淘汰。活跃信息应该在内存中维护，所以也不需要事务
-int blk_pool_get(NvmCacheBlkPool *self, NvmCacheBlkId id, NvmCacheBlk *blk);
+void destroy_nvm_blk_pool(NvmCacheBlkPool *manager);
 
-/***********************public API***********************/
-
-#endif
+#endif // NVM_BLK_MANAGER_H
